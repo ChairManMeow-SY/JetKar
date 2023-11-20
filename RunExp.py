@@ -7,11 +7,15 @@ use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
 ## init dataset ##
-dataset_root='/data/IDTZSY/RSCD/Data'
+dataset_root='/data_0/Work/ZipFiles/rscd_data/'
 save_dataset_file=dataset_root+'/all_dataset.pkl'
-DataIO.SaveDataset(dataset_root,save_dataset_file)
 
-log_file='/output/log.txt'
+if os.path.exists(save_dataset_file):
+    pass
+else:
+    DataIO.SaveDataset(dataset_root,save_dataset_file)
+
+log_file='./log.txt'
 
 ## init model ##
 batch_size=RSCDModel.batch_size
