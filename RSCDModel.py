@@ -25,12 +25,16 @@ class RoadSurfaceModel():
         self.save_folder=None
         self.save_log_file=None
     
-    def init_save_folder(self,save_folder):
-        self.save_folder=save_folder
+    def init_save_folder(self,save_folder=None):
+        if save_folder is None:
+            self.save_folder='./save_model'
+        else:
+            self.save_folder=save_folder
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
 
-    def initall(self,b_training=False,model_path=None):
+    def initall(self,b_training=False,model_path=None,save_folder=None):
+        self.init_save_folder(save_folder)
         if b_training:
             self.def_model(True)
             for param in self.efficient_model.parameters():
@@ -75,7 +79,7 @@ class RoadSurfaceModel():
         all_valid_loss=[]
         all_valid_acc=[]
 
-        self.save_log_file('[INFO] start training...\n')
+        self.log_save('[INFO] start training...\n')
 
         for epoch in range(epoch_num):
             trainning_loss,trainning_acc=self.train_one_epoch(optimizer,criterian)

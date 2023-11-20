@@ -29,7 +29,7 @@ test_dataset=DataIO.MakeDataset(test_data)
 
 train_loader,valid_loader,test_loader=DataIO.MakeAllDataloader(train_dataset,valid_dataset,test_dataset,batch_size,num_workers)
 
-rscd_model.initall(True,None)
+rscd_model.initall(True,None,'./save_model')
 rscd_model.train_dataset=train_data
 rscd_model.train_loader=train_loader
 
