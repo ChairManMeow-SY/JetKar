@@ -7,15 +7,29 @@ use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
 ## init dataset ##
-dataset_root='D:/Work/RSCD/RSCD_dataset'
+dataset_root='/data/IDTZSY/RSCD/Data'
 save_dataset_file=dataset_root+'/all_dataset.pkl'
 DataIO.SaveDataset(dataset_root,save_dataset_file)
+
+log_file='/output/log.txt'
 
 ## init model ##
 batch_size=RSCDModel.batch_size
 num_workers=RSCDModel.num_workers
-model = RSCDModel.RoadSurfaceModel()
+rscd_model = RSCDModel.RoadSurfaceModel()
 train_data,valid_data,test_data=DataIO.ReadDataset(save_dataset_file)
 train_loader,valid_loader,test_loader=DataIO.MakeAllDataloader(train_data,valid_data,test_data,batch_size,num_workers)
-model.initall()
+
+rscd_model.initall(True,None)
+rscd_model.train_dataset=train_data
+rscd_model.train_loader=train_loader
+
+rscd_model.test_dataset=test_data
+rscd_model.test_loader=test_loader
+
+rscd_model.valid_dataset=valid_data
+rscd_model.valid_loader=valid_loader
+
+rscd_model.train(10)
+
 

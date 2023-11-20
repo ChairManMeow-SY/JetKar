@@ -38,6 +38,11 @@ class RoadSurfaceModel():
                 param.requires_grad = False
         self.efficient_model.to(device)
 
+    def rebuild_model(self,model_path=None):
+        self.efficient_model = None
+        self.def_model()
+        self.load_parameters(model_path)
+
     def def_model(self,b_pretrained=False):
         # for the first time
         self.efficient_model = models.efficientnet_b0(pretrained=b_pretrained)
@@ -52,7 +57,7 @@ class RoadSurfaceModel():
     def save_model_parameters(self,save_path):
         torch.save(self.efficient_model.state_dict(), save_path)
     
-    def train(self,epoch_num):
+    def train(self,epoch_num,log_file=None):
         criterian = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(self.efficient_model.parameters(), lr=0.001)
 
@@ -65,7 +70,11 @@ class RoadSurfaceModel():
         all_valid_loss=[]
         all_valid_acc=[]
 
-        print('[INFO] start training...')
+        if log_file is None:
+            print('[INFO] start training...\n')
+        else:
+            with open(log_file,'a') as f:
+                f.write('[INFO] start training...\n')
 
         for epoch in range(epoch_num):
             trainning_loss,trainning_acc=self.train_one_epoch(optimizer,criterian)
@@ -77,8 +86,15 @@ class RoadSurfaceModel():
             all_valid_acc.append(valid_acc)
             all_valid_loss.append(valid_loss)
 
-            print(f'[INFO] epoch_{epoch+1},trainning_loss:{trainning_loss},trainning_acc:{trainning_acc}')
-            print(f'[INFO] epoch_{epoch+1},valid_loss:{valid_loss},valid_acc:{valid_acc}')
+            if log_file is None:
+                print*(f'[INFO] epoch_{epoch+1} starts......\n')
+                print(f'[INFO] epoch_{epoch+1},trainning_loss:{trainning_loss},trainning_acc:{trainning_acc}\n')
+                print(f'[INFO] epoch_{epoch+1},valid_loss:{valid_loss},valid_acc:{valid_acc}\n')
+            else:
+                with open(log_file,'a') as fid:
+                    fid.write(f'[INFO] epoch_{epoch+1}\n')
+                    fid.write(f'[INFO] epoch_{epoch+1},trainning_loss:{trainning_loss},trainning_acc:{trainning_acc}\n')
+                    fid.write(f'[INFO] epoch_{epoch+1},valid_loss:{valid_loss},valid_acc:{valid_acc}\n')
 
             save_path=os.path.join(self.save_folder,f'epoch_{epoch+1}.pth')
             self.save_model_parameters(save_path)
@@ -127,7 +143,6 @@ class RoadSurfaceModel():
                 test_accuracy+=torch.sum(torch.argmax(output, 1) == label).item()
         test_accuracy /= len(self.test_loader)
         return test_accuracy
-
 
 
     
