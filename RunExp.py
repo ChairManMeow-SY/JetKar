@@ -17,8 +17,13 @@ log_file='/output/log.txt'
 batch_size=RSCDModel.batch_size
 num_workers=RSCDModel.num_workers
 rscd_model = RSCDModel.RoadSurfaceModel()
+
 train_data,valid_data,test_data=DataIO.ReadDataset(save_dataset_file)
-train_loader,valid_loader,test_loader=DataIO.MakeAllDataloader(train_data,valid_data,test_data,batch_size,num_workers)
+train_dataset=DataIO.MakeDataset(train_data)
+valid_dataset=DataIO.MakeDataset(valid_data)
+test_dataset=DataIO.MakeDataset(test_data)
+
+train_loader,valid_loader,test_loader=DataIO.MakeAllDataloader(train_dataset,valid_dataset,test_dataset,batch_size,num_workers)
 
 rscd_model.initall(True,None)
 rscd_model.train_dataset=train_data

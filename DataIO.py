@@ -120,6 +120,10 @@ def ReadDataset(save_file):
         test_labels=pickle.load(f)
     return [train_imgs,train_labels],[valid_imgs,valid_labels],[test_imgs,test_labels]
 
+def MakeDataset(in_data):
+    all_imgs,all_labels=in_data
+    return RSCDDataset(all_imgs,all_labels)
+
 def NoStrategyTransform():
     simple_transform=transforms.Compose([
             transforms.Resize((image_size,image_size)),
