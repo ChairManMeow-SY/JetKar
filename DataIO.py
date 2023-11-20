@@ -122,7 +122,8 @@ def ReadDataset(save_file):
 
 def MakeDataset(in_data):
     all_imgs,all_labels=in_data
-    return RSCDDataset(all_imgs,all_labels)
+    transforms=NoStrategyTransform()
+    return RSCDDataset(all_imgs,all_labels,transform=transforms)
 
 def NoStrategyTransform():
     simple_transform=transforms.Compose([

@@ -22,10 +22,14 @@ class RoadSurfaceModel():
         self.valid_loader=None
         self.test_loader=None
 
-        self.save_folder='./save_model/'
-        if not os.path.exists(self.save_folder):
-            os.mkdir(self.save_folder)
+        self.save_folder=None
+        self.save_log_file=None
     
+    def init_save_folder(self,save_folder):
+        self.save_folder=save_folder
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder)
+
     def initall(self,b_training=False,model_path=None):
         if b_training:
             self.def_model(True)
@@ -58,6 +62,7 @@ class RoadSurfaceModel():
         torch.save(self.efficient_model.state_dict(), save_path)
     
     def train(self,epoch_num,log_file=None):
+        self.save_log_file=log_file
         criterian = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(self.efficient_model.parameters(), lr=0.001)
 
@@ -70,11 +75,7 @@ class RoadSurfaceModel():
         all_valid_loss=[]
         all_valid_acc=[]
 
-        if log_file is None:
-            print('[INFO] start training...\n')
-        else:
-            with open(log_file,'a') as f:
-                f.write('[INFO] start training...\n')
+        self.save_log_file('[INFO] start training...\n')
 
         for epoch in range(epoch_num):
             trainning_loss,trainning_acc=self.train_one_epoch(optimizer,criterian)
@@ -105,7 +106,11 @@ class RoadSurfaceModel():
         self.efficient_model.train()
         training_loss=0
         training_accuracy=0
+
+        counter=0
         for data, label in self.train_loader:
+            print(f'[INFO] Now run batch {counter}')
+            counter+=1
             data, label = data.to(device), label.to(device)
             optimizer.zero_grad()
             output = self.efficient_model(data)
@@ -144,5 +149,10 @@ class RoadSurfaceModel():
         test_accuracy /= len(self.test_loader)
         return test_accuracy
 
-
+    def log_save(self,message_str):
+        if self.save_log_file is None:
+            print(message_str)
+        else:
+            with open(self.save_log_file,'a') as f:
+                f.write(message_str)
     
