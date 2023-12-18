@@ -142,7 +142,8 @@ class RoadSurfaceModel():
         valid_accuracy /= len(self.valid_loader)
         return valid_loss,valid_accuracy
 
-    def eval(self):
+    def eval(self,log_file):
+        self.save_log_file=log_file
         self.efficient_model.eval()
         test_accuracy=0
         with torch.no_grad():
@@ -150,7 +151,8 @@ class RoadSurfaceModel():
                 data, label = data.to(device), label.to(device)
                 output = self.efficient_model(data)
                 test_accuracy+=torch.sum(torch.argmax(output, 1) == label).item()
-        test_accuracy /= len(self.test_loader)
+        test_accuracy /= (len(self.test_loader)*batch_size)
+        self.log_save("The test acc is %f" % test_accuracy)
         return test_accuracy
 
     def log_save(self,message_str):
