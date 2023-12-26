@@ -2,4 +2,4 @@
 cd /code
 source activate
 conda activate pytorch
-python RunExp.py
+python RunTest.py
