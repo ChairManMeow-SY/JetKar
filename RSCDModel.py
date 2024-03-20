@@ -1,6 +1,7 @@
 import torchvision.models as models
 import torch
 import os
+from DataIO import NoStrategyTransform
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
@@ -13,6 +14,7 @@ num_workers=8
 class RoadSurfaceModel():
     def __init__(self) -> None:
         self.efficient_model=None
+        self.data_transformer=None
 
         self.train_dataset=None
         self.valid_dataset=None
@@ -154,6 +156,20 @@ class RoadSurfaceModel():
         test_accuracy /= (len(self.test_loader)*batch_size)
         self.log_save("The test acc is %f" % test_accuracy)
         return test_accuracy
+    
+    def SetTransformer(self,in_transform):
+        self.data_transformer=in_transform
+
+    def eval_single_image(self,in_img):
+        if self.data_transformer is None:
+            self.SetTransformer(NoStrategyTransform())
+        in_img=self.data_transformer(in_img)
+        self.efficient_model.eval()
+        with torch.no_grad():
+            in_img=in_img.to(device)
+            output = self.efficient_model(in_img)
+            ret_label=torch.argmax(output, 1) 
+        return ret_label
 
     def log_save(self,message_str):
         if self.save_log_file is None:
