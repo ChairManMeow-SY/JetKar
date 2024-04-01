@@ -1,5 +1,6 @@
 import torchvision.models as models
 import torch
+import torch.nn as nn
 import os
 from DataIO import NoStrategyTransform
 
@@ -56,7 +57,15 @@ class RoadSurfaceModel():
     def def_model(self,b_pretrained=False):
         # for the first time
         self.efficient_model = models.efficientnet_b0(pretrained=b_pretrained)
-        self.efficient_model.classifier[1]=torch.nn.Linear(self.efficient_model.classifier[1].in_features,num_classes)
+        in_f_num=self.efficient_model.classifier[1].in_features
+        '''
+        self.efficient_model.classifier[1]=nn.Sequential(
+            nn.Dropout(p=0.2, inplace=True),
+            nn.Linear(in_f_num, num_classes),
+            nn.Softmax
+        )
+        '''
+        self.efficient_model.classifier[1]=torch.nn.Linear(in_f_num,num_classes)
     
     def load_parameters(self,model_path):
         if model_path is None:
@@ -159,6 +168,36 @@ class RoadSurfaceModel():
     
     def SetTransformer(self,in_transform):
         self.data_transformer=in_transform
+    
+    def eval_jetour(self,jet_loader,label_to_jetour,log_file):
+        self.save_log_file=log_file
+        self.efficient_model.eval()
+        test_accuracy=0
+        test_count=0
+        all_output_properties=[]
+
+        all_origin_labels=[]
+        all_out_labels=[]
+
+        with torch.no_grad():
+            for data,label in jet_loader:
+                data, label = data.to(device), label.to(device)
+                output = self.efficient_model(data)
+                all_output_properties.append(output)
+                origin_label=torch.argmax(output, 1)
+                all_origin_labels.append(origin_label)
+                out_label=origin_label.clone()
+                for i in range(origin_label.shape[0]):
+                    tmp=int(out_label[i])
+                    if tmp in label_to_jetour.keys():
+                        out_label[i]=label_to_jetour[int(out_label[i])]
+                test_count+=len(label)
+                all_out_labels.append(out_label)
+                test_accuracy+=torch.sum(out_label == label).item()
+        test_accuracy /= test_count
+        self.log_save("The test acc is %f" % test_accuracy)
+        print("The test acc is %f" % test_accuracy)
+        return test_accuracy,all_origin_labels,all_out_labels,all_output_properties
 
     def eval_single_image(self,in_img):
         if self.data_transformer is None:
