@@ -5,6 +5,7 @@ import os
 import json
 import torch
 import numpy as np
+from torch.utils.data import DataLoader
 
 
 def GetLargetstClasses(in_prop,largest_num):
@@ -42,7 +43,12 @@ if __name__=='__main__':
     jetour_model.initall(False,model_path,save_folder)
 
 
-    jet_loader=JetourDataset.GetJetourDataLoader(jetour_path,json_path)
+    #jet_loader=JetourDataset.GetJetourDataLoader(jetour_path,json_path)
+    
+    block_path=os.path.join(jetour_root,'crop_images')
+    jet_dataset=JetourDataset.GetJetourDataset_Block(block_path,json_path)
+
+    jet_loader=DataLoader(jet_dataset,batch_size=RSCDModel.batch_size,shuffle=False,num_workers=RSCDModel.num_workers)
 
     tmp,all_origin_labels,all_out_labels,all_prop= jetour_model.eval_jetour(jet_loader,jetour_classes,log_file)
 
@@ -59,12 +65,8 @@ if __name__=='__main__':
     all_jetour_labels=[]
     all_img_names=[]
 
-    with open(json_path,'r') as fid:
-        all_data=json.load(fid)
-        for image_info in all_data:
-            all_img_names.append(image_info['image_name'])
-            all_jetour_labels.append(int(image_info['image_attr']['label_1']))
 
+    '''
     asphalt_acc=0
     snow_acc=0
     asphalt_num=0
@@ -122,6 +124,7 @@ if __name__=='__main__':
             fid.write('\n')
 
     print("asphalt acc: %f, snow acc: %f"%(asphalt_acc,snow_acc))
+    '''
 
 
 

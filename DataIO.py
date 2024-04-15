@@ -151,6 +151,12 @@ class RSCDDataset(Dataset):
         if self.transform is not None:
             img = self.transform(img)
         return img,img_label
+    
+    def GetAllImageName(self):
+        return self.all_imgs
+    
+    def GetAllLabels(self):
+        return self.all_labels
 
 def MakeAllDataloader(train_dataset,valid_dataset,test_dataset,batch_size,num_workers):
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)

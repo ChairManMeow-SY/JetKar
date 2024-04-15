@@ -12,8 +12,10 @@ image_size=224
 training_epochs=5
 num_workers=8
 
+def Generate
+
 class RoadSurfaceModel():
-    def __init__(self) -> None:
+    def __init__(self,in_criterian=None,in_lr=0.001,use_) -> None:
         self.efficient_model=None
         self.data_transformer=None
 
@@ -27,6 +29,15 @@ class RoadSurfaceModel():
 
         self.save_folder=None
         self.save_log_file=None
+
+        # training components
+        if in_criterian is None:
+            self.criterian=nn.CrossEntropyLoss()
+        else:
+            self.criterian=in_criterian
+
+        self.lr=in_lr
+
     
     def init_save_folder(self,save_folder=None):
         if save_folder is None:
@@ -78,8 +89,9 @@ class RoadSurfaceModel():
     
     def train(self,epoch_num,log_file=None):
         self.save_log_file=log_file
-        criterian = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(self.efficient_model.parameters(), lr=0.001)
+        #criterian = torch.nn.CrossEntropyLoss()
+        criterian =self.criterian
+        optimizer = torch.optim.Adam(self.efficient_model.parameters(), lr=self.lr)
 
         self.efficient_model.to(device)
         self.efficient_model.train()
